@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic 6 - Trend Master</title>
+    <style>
+        :root {
+            --primary-blue: #3498db;
+            --success-green: #2ecc71;
+            --error-red: #e74c3c;
+        }
+
+        body {
+            margin: 0;
+            margin-top: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: url('asset/Basic 6 final.jpg') no-repeat center center/cover;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #game-container {
+            width: 450px;
+            height: 600px;
+            background: rgba(0, 0, 0, 0.4);
+            position: relative;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        #ui-layer {
+            margin-top: 80px; 
+            width: 80%;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .question-text { font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; line-height: 1.4; color: #2c3e50; }
+        .options { display: grid; gap: 10px; }
+        
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background: var(--primary-blue);
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 600;
+        }
+
+        button:hover { filter: brightness(1.1); }
+        img{float: left;}
+        #stats { position: absolute; top: 10px; right: 10px; color: white; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="ui-layer">
+        <img src="asset/photo_2026-02-10_07-43-14-removebg-preview.png" alt="logo" height="50">
+        <h1>Trend Master</h1>
+        <p>B6.4.1.1.3 Apply understanding of how to create a line graph by using a given table of values (or set of data) to draw a line graph and answer questions based on them to interpret and draw conclusionsg</p>
+        <div id="stats">Score: <span id="score">0</span>/10</div>
+        <div id="game-box">
+            <p class="question-text" id="question">Loading...</p>
+            <div class="options" id="options"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+<script>
+    const questions = [
+        { q: "A line that goes up steeply means the change is...", a: ["Slow", "Fast", "Zero"], c: 1 },
+        { q: "If the line is perfectly horizontal, what happened?", a: ["Rapid increase", "Rapid decrease", "No change"], c: 2 },
+        { q: "How do you find the highest value on the graph?", a: ["Look for the Peak", "Look for the Dip", "Look for the Start"], c: 0 },
+        { q: "If a trend is steadily increasing, what is a likely prediction?", a: ["It will drop to zero", "It will continue to rise", "It will vanish"], c: 1 },
+        { q: "Which tool helps you connect dots to see the trend?", a: ["Compass", "Ruler", "Protractor"], c: 1 },
+        { q: "To find the value for Day 3, you move from 3 on the X-axis up to...", a: ["The title", "The line", "The Y-axis directly"], c: 1 },
+        { q: "What do we call it when the line goes down from left to right?", a: ["Increase", "Decrease", "Constant"], c: 1 },
+        { q: "A 'conclusion' is when you use the graph to...", a: ["Draw more dots", "Explain what the data means", "Erase the axis"], c: 1 },
+        { q: "True or False: The steeper the line, the smaller the change.", a: ["True", "False"], c: 1 },
+        { q: "Which axis is best for showing 'Time' in a growth graph?", a: ["X-Axis", "Y-Axis", "Neither"], c: 0 }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+
+    const playSound = (freq, type) => {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.5);
+        osc.stop(ctx.currentTime + 0.5);
+    };
+
+    function loadQuestion() {
+        if (currentIdx >= questions.length) {
+            document.getElementById('game-box').innerHTML = `<h2>Data Analyst!</h2><p>You scored ${score}/10</p>`;
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            return;
+        }
+        const item = questions[currentIdx];
+        document.getElementById('question').innerText = item.q;
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = '';
+        
+        item.a.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.innerText = opt;
+            btn.onclick = () => {
+                if (i === item.c) { 
+                    score++; 
+                    document.getElementById('score').innerText = score;
+                    playSound(880, 'sine');
+                } else {
+                    playSound(220, 'square');
+                }
+                currentIdx++;
+                loadQuestion();
+            };
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
